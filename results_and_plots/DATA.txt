@@ -1,0 +1,133 @@
+#LOADING AND ALIGNING DATA
+✅ Total monthly records: 300
+  date            mortgage_rate
+0 2000-03-01         8.2400
+1 2000-04-01         8.1525
+2 2000-05-01         8.5150
+3 2000-06-01         8.2880
+4 2000-07-01         8.1475
+   date             home_price_index
+0 2000-03-01           102.127
+1 2000-04-01           102.923
+2 2000-05-01           103.678
+3 2000-06-01           104.425
+4 2000-07-01           105.054
+✅ All CSVs loaded and dates aligned to month start.
+301 301 301 301 301
+
+# MERGEING DATA
+✅ Merged DataFrame shape: (291, 7)
+        date  home_price_index  fed_funds_rate  housing_starts  \
+0 2001-01-01           109.848            5.98            1600   
+1 2001-01-01           109.848            5.49            1600   
+2 2001-01-01           109.848            5.31            1600   
+3 2001-01-01           109.848            4.80            1600   
+4 2001-01-01           109.848            4.21            1600   
+
+   unemployment_rate  inflation_cpi  mortgage_rate  
+0                4.2          175.6         7.0325  
+1                4.2          175.6         7.0325  
+2                4.2          175.6         7.0325  
+3                4.2          175.6         7.0325  
+4                4.2          175.6         7.0325  
+
+# CHECKING FOR MISSING VALUES
+date                 0
+home_price_index     0
+fed_funds_rate       0
+housing_starts       0
+unemployment_rate    0
+inflation_cpi        0
+mortgage_rate        0
+dtype: int64
+
+Total missing cells: 0
+
+
+# CORRELATION FACTORS (AFTER NORMALIZING CPI AND HOUSING_STARTS)
+normlized cpi and housing_starts
+home_price_index             1.000000
+date                         0.838997
+fed_funds_rate               0.424760
+cpi_pct_change               0.124992
+housing_starts_pct_change   -0.034486
+mortgage_rate               -0.086185
+unemployment_rate           -0.553804
+Name: home_price_index, dtype: float64
+
+
+# RESULT OF FIRST ADF TEST WITHOUT ANY DIFFRENCING 
+ADF Test: Home Price Index
+ADF Statistic: -0.04030989909280929
+p-value: 0.9550687960352268
+# Lags Used: 12
+# Observations Used: 277
+Critical Value 1%: -3.4541800885158525
+Critical Value 5%: -2.872031361137725
+Critical Value 10%: -2.5723603999791473
+❌ Series is non-stationary (fail to reject H0)
+
+
+# RESULTS AFTER 1ST DIFFRENCING
+ADF Test: Differenced Home Price Index
+ADF Statistic: -2.3105999841118523
+p-value: 0.16857205324369318
+# Lags Used: 11
+# Observations Used: 277
+Critical Value 1%: -3.4541800885158525
+Critical Value 5%: -2.872031361137725
+Critical Value 10%: -2.5723603999791473
+❌ Series is non-stationary (fail to reject H0)
+
+
+# RESULTS AFTER 2ND DIFFRENCING
+ADF Test: 2nd Differenced Home Price Index
+ADF Statistic: -20.129142400527595
+p-value: 0.0
+# Lags Used: 10
+# Observations Used: 277
+Critical Value 1%: -3.4541800885158525
+Critical Value 5%: -2.872031361137725
+Critical Value 10%: -2.5723603999791473
+✅ Series is stationary (reject H0)
+
+# SARIMAX RESULTS
+==============================================================================
+Dep. Variable:       home_price_index   No. Observations:                  290
+Model:               SARIMAX(1, 2, 1)   Log Likelihood                -775.434
+Date:                Fri, 13 Jun 2025   AIC                           1566.869
+Time:                        18:58:34   BIC                           1596.173
+Sample:                             0   HQIC                          1578.612
+                                - 290                                         
+Covariance Type:                  opg   
+
+=============================================================================================
+                                coef    std err          z      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------------
+fed_funds_rate                0.3308      1.687      0.196      0.845      -2.976       3.637
+cpi_pct_change                1.5555      0.075     20.653      0.000       1.408       1.703
+unemployment_rate            -2.5448      0.221    -11.501      0.000      -2.978      -2.111
+housing_starts_pct_change     0.1207      0.016      7.652      0.000       0.090       0.152
+mortgage_rate                 2.5072      0.566      4.430      0.000       1.398       3.617
+
+Train RMSE: 7.52
+
+
+# AFTER REMOVING RESIDUAL 
+
+==============================================================================
+Dep. Variable:       home_price_index   No. Observations:                  286
+Model:               SARIMAX(1, 2, 1)   Log Likelihood                -789.074
+Date:                Fri, 13 Jun 2025   AIC                           1594.149
+Time:                        17:29:45   BIC                           1623.284
+Sample:                             0   HQIC                          1605.832
+                                - 286                                         
+Covariance Type:                  opg                                         
+=============================================================================================
+                                coef    std err          z      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------------
+fed_funds_rate                0.3947      2.402      0.164      0.869      -4.313       5.102
+cpi_pct_change                1.0813      0.138      7.823      0.000       0.810       1.352
+unemployment_rate            -3.4583      0.235    -14.689      0.000      -3.920      -2.997
+housing_starts_pct_change     0.1087      0.026      4.233      0.000       0.058       0.159
+mortgage_rate                 2.9112      0.778      3.742      0.000       1.386       4.436
